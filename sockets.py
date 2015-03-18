@@ -59,12 +59,27 @@ class World:
     def world(self):
         return self.space
 
+class Client:
+    def __init__(self):
+        self.queue = queue.Queue()
+    def put(self, v):
+        self.queue.put_nowait(v)
+    def get(self):
+        return self.queue.get()
+
+def send_all(msg):
+    for client in clients:
+        client.put( msg )
+def send_all_json(obj):
+    send_all( json.dumps(obj) )
+    
+clients = list()
+
 myWorld = World()        
 
 def set_listener( entity, data ):
     ''' do something with the update ! '''
-    for key, value in data:
-        update(entity, key, value)
+   
 
 
 myWorld.add_set_listener( set_listener )
@@ -75,17 +90,18 @@ def hello():
     return redirect("/static/index.html", code=302)
 
 def read_ws(ws,client):
-    '''A greenlet function that reads from the websocket and updates the world'''
-    # XXX: TODO IMPLEMENT ME
+    '''A greenlet function that reads from the websocket'''
     try:
         while True:
-            message = ws.receive()
-            if message is None:
+            msg = ws.receive()
+            print "WS RECV: %s" % msg
+            if (msg is not None):
+                packet = json.loads(msg)
+                send_all_json( packet )
+            else:
                 break
-            packet = json.loads(message)
-            client.put(json.dumps(packet))
     except:
-        print "read_ws error"
+        '''Done'''
 
 @sockets.route('/subscribe')
 def subscribe_socket(ws):
@@ -94,17 +110,20 @@ def subscribe_socket(ws):
     # XXX: TODO IMPLEMENT ME
     client = Client()
     clients.append(client)
-    g = gevent.spawn( read_ws, ws, client )    
+    g = gevent.spawn( read_ws, ws, client )
+    print "Subscribing"
     try:
         while True:
             # block here
-            message = client.get()
-            ws.send(message)
+            msg = client.get()
+            print "Got a message!"
+            ws.send(msg)
     except Exception as e:# WebSocketError as e:
         print "WS Error %s" % e
     finally:
         clients.remove(client)
         gevent.kill(g)
+    
 
 
 def flask_post_json():
