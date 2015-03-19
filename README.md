@@ -19,12 +19,15 @@ pip install gunicorn
 Contributors / Licensing
 ========================
 
-Generally everything is LICENSE'D under the Apache 2 license by Abram Hindle.
+Generally everything is LICENSE'D under the Apache 2 license by Morgan Patzelt.
+
+Some code was taken from WebSocketExamples by Abram Hindle and thus is copyright under Abram Hindle.
 
 freetests.py is LICENSE'D under a BSD-like license:
 
 From ws4py
 
+Copyright (c) 2015, Morgan Patzelt
 Copyright (c) 2011-2014, Sylvain Hellegouarch, Abram Hindle
 All rights reserved.
 
@@ -57,3 +60,4 @@ Contributors
 
 * Mark Galloway
 * Abram Hindle
+* Morgan Patzelt
